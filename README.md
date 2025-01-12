@@ -15,54 +15,44 @@ A aplicação deve conseguir:
 - Listar o top10 livros mais baixados com Média, Mínimo, Máximo e se o livro está acima ou abaixo da média
 - Listar os livros de determinada língua
 - Contar quantidade de livros de determinada língua
-
 - Listar todos autores
 - Listar os autores vivos em um determinado ano
 - Encontrar um autor pelo seu nome
+
 # Projeto de Gerenciamento de Livros e Autores
 
-Este projeto gerencia livros e autores em um banco de dados, permitindo o cadastro de livros. Utilizei a API [Gutendex](https://gutendex.com/), para obter dados dos livros.
+## 1. Configuração do Ambiente
 
+- **Linguagem de Programação**: Java
+- **Ferramenta de Gerenciamento de Projetos**: Maven
+- **Versão do Spring Boot**: A versão utilizada no exemplo da aula.
 
-## Funcionalidades
+### Dependências:
+- **Spring Data JPA**: Facilita a persistência de dados.
+- **Driver do PostgreSQL**: Para conectar ao banco de dados PostgreSQL.
 
-- Cadastro de livros e autores
-- Verificação de existência de livros antes do cadastro
-- Relacionamento bidirecional entre livros e autores
-- Listar os autores vivos em um determinado ano
-- Listar todos autores
-- Pesquisa de livros por título
-- Listar os livros de um determinado idioma
+## 2. Consumo da API Gutendex
 
+O aplicativo utiliza a API Gutendex para:
 
+- **Realizar a busca de livros por título**: O usuário pode inserir o título de um livro e a aplicação busca na API.
+- **Obter informações do livro**: A API retorna dados como título, autor, idioma e número de downloads.
 
-## Método `save(Book book, Author author)`
-Este é o método central para associar livros e autores no banco de dados. Ele realiza a verificação de duplicação antes de salvar um livro e garante a associação bidirecional entre livros e autores. As operações realizadas são:
+## 3. Persistência de Dados no Banco de Dados PostgreSQL
 
-- **Verificação do livro existente**: Antes de salvar, o método verifica se o livro já está cadastrado no banco.
-- **Verificação do autor existente**: Se o autor não estiver cadastrado, o autor é salvo junto com o livro, estabelecendo a relação entre eles.
-- **Relacionamento bidirecional**: O método adiciona o livro à lista de livros do autor, garantindo a associação bidirecional.
-- **Associação do livro a autor já existente**: Caso o autor já esteja cadastrado no banco, o livro é simplesmente associado a esse autor, sem duplicar o autor no banco.
-### Código do Método `save`:
+- **Criar Tabelas**: O aplicativo cria tabelas para armazenar dados dos livros, incluindo informações como título, autor, idioma e número de downloads.
+- **Inserir Dados**: Os dados obtidos da API Gutendex são inseridos no banco de dados.
 
-```java
-private void save(Book book, Author author) {
-    Optional<Book> bookFound = repository.findByTitle(book.getTitle());
-    bookFound.ifPresentOrElse(
-            b -> System.out.println("Livro já cadastrado tente outro"),
-            () -> {
-                Author authorToSave = repository.findByNameContainingIgnoreCase(author.getName())
-                        .orElse(author);
-                authorToSave.addBook(book);
-                repository.save(authorToSave);
-            }
-    );
-}
-```
-### Explicação
+## 4. Interface do Usuário (Terminal)
 
-- **`findByTitle()`**: Verifica se o livro já está registrado no banco.
-- **`findByNameContainingIgnoreCase()`**: Verifica se o autor já está no banco, ignorando diferenças de maiúsculas/minúsculas no nome.
-- **`orElse(author)`**: Se o autor não for encontrado, o próprio autor passado como parâmetro é usado.
-- **`addBook()`**: O livro é adicionado à lista de livros do autor, estabelecendo o relacionamento bidirecional.
-- **`repository.save()`**: O autor é salvo (ou atualizado) no banco, com o livro já associado.
+O aplicativo oferece as seguintes opções no menu interativo:
+
+1. **Buscar Livro pelo Título**: O usuário pode inserir o título de um livro, que será buscado na API Gutendex e registrado no banco de dados, caso não esteja previamente registrado.
+
+2. **Listar Livros Registrados**: O usuário pode listar todos os livros armazenados no banco de dados.
+
+3. **Listar Autores Registrados**: O usuário pode listar todos os autores dos livros armazenados.
+
+4. **Listar Autores Vivos em um Determinado Ano**: O usuário pode inserir um ano e a aplicação lista todos os autores que estavam vivos naquele ano.
+
+5. **Listar Livros em um Determinado Idioma**: O usuário pode inserir um idioma e a aplicação lista todos os livros disponíveis nesse idioma.
